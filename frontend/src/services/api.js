@@ -2,8 +2,7 @@
  * EcoMind AI API Client
  * Connects React frontend with FastAPI backend REST endpoints.
  */
-
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
