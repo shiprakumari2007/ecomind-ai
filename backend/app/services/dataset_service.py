@@ -49,7 +49,7 @@ class DatasetService:
         return df
 
 @classmethod
-    def validate_and_profile_data(cls, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+def validate_and_profile_data(cls, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """
         Validates columns, checks data quality, handles missing values,
         and generates a detailed quality report.
