@@ -222,7 +222,7 @@ for _, row in df.iterrows():
             department=str(row["department"]),
             appliance=str(row["appliance"]),
             energy_consumption_kwh=float(row["energy_consumption_kwh"]),
-            temperature=float(row["temperature"]),
+            temperature=float(row["temperature"]), 
             occupancy=int(occupancy_value),
             electricity_rate=float(row["electricity_rate"]),
                 )
@@ -233,7 +233,7 @@ for _, row in df.iterrows():
     for i in range(0, len(records_to_create), chunk_size):
         db.bulk_save_objects(records_to_create[i : i + chunk_size])
         db.commit()
- return len(records_to_create)
+    return len(records_to_create)
 @classmethod
 def load_sample_dataset_into_db(cls, db: Session) -> Dict[str, Any]:
     """Loads or generates the 6-month synthetic dataset into database."""
