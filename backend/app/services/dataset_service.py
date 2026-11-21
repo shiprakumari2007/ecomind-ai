@@ -79,7 +79,9 @@ class DatasetService:
                 col_map[col] = "electricity_rate"
 
         df = df.rename(columns=col_map)
-
+        # Handle duplicate column names
+        if df.columns.duplicated().any():
+            df = df.T.groupby(level=0, sort=False).first().T
         if "timestamp" not in df.columns:
             raise ValueError("Missing required column: 'timestamp' (or 'date') could not be identified.")
         if "energy_consumption_kwh" not in df.columns:
@@ -199,6 +201,13 @@ class DatasetService:
         # Batch insert energy records
         records_to_create = []
         for _, row in df.iterrows():
+            occupancy_value = row["occupancy"]
+
+        if isinstance(occupancy_value, pd.Series):
+            occupancy_value = occupancy_value.iloc[0]
+
+        occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
+        occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
             ts = row["timestamp"]
             if isinstance(ts, str):
                 ts = datetime.fromisoformat(ts)
@@ -213,7 +222,7 @@ class DatasetService:
                     appliance=str(row["appliance"]),
                     energy_consumption_kwh=float(row["energy_consumption_kwh"]),
                     temperature=float(row["temperature"]),
-                    occupancy=int(row["occupancy"]),
+                    occupancy=int(occupancy_value),
                     electricity_rate=float(row["electricity_rate"]),
                 )
             )
