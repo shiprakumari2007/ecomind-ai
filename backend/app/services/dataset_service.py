@@ -48,7 +48,7 @@ class DatasetService:
         df.columns = [str(c).strip().lower().replace(" ", "_").replace("-", "_") for c in df.columns]
         return df
 
-    @classmethod
+@classmethod
     def validate_and_profile_data(cls, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
         """
         Validates columns, checks data quality, handles missing values,
@@ -107,7 +107,7 @@ class DatasetService:
         duplicates_count = int(df.duplicated(subset=["timestamp", "building", "department", "appliance"]).sum())
 
         # Clean timestamp
-        try:
+         try:
             df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
         except Exception:
             pass
@@ -170,7 +170,7 @@ class DatasetService:
             db.commit()
 
         # Update metadata entities
-        existing_buildings = {b.name for b in db.query(Building).all()}
+         existing_buildings = {b.name for b in db.query(Building).all()}
         for b_name in df["building"].unique():
             if b_name not in existing_buildings:
                 db.add(Building(name=b_name))
@@ -198,59 +198,63 @@ class DatasetService:
 
         db.commit()
 
+
         # Batch insert energy records
         records_to_create = []
-       for _, row in df.iterrows():
-           occupancy_value = row["occupancy"]
 
-           if isinstance(occupancy_value, pd.Series):
-               occupancy_value = occupancy_value.iloc[0]
+        for _, row in df.iterrows():
+            occupancy_value = row["occupancy"]
 
-          occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
-          occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
+            if isinstance(occupancy_value, pd.Series):
+                occupancy_value = occupancy_value.iloc[0]
 
-          ts = row["timestamp"]
-          if isinstance(ts, str):
-              ts = datetime.fromisoformat(ts)
-          elif hasattr(ts, "to_pydatetime"):
-              ts = ts.to_pydatetime()
+            occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
+            occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
 
-         records_to_create.append(
-             EnergyRecord(
-                 timestamp=ts,
-                 building=str(row["building"]),
-                 department=str(row["department"]),
-                 appliance=str(row["appliance"]),
-                 energy_consumption_kwh=float(row["energy_consumption_kwh"]),
-                 temperature=float(row["temperature"]), 
-                 occupancy=int(occupancy_value),
-                 electricity_rate=float(row["electricity_rate"]),
+            ts = row["timestamp"]
+            if isinstance(ts, str):
+                ts = datetime.fromisoformat(ts)
+            elif hasattr(ts, "to_pydatetime"):
+                ts = ts.to_pydatetime()
+
+            records_to_create.append(
+                EnergyRecord(
+                    timestamp=ts,
+                    building=str(row["building"]),
+                    department=str(row["department"]),
+                    appliance=str(row["appliance"]),
+                    energy_consumption_kwh=float(row["energy_consumption_kwh"]),
+                    temperature=float(row["temperature"]),
+                    occupancy=int(occupancy_value),
+                    electricity_rate=float(row["electricity_rate"]),
                 )
             )
 
         # Insert in chunks of 2,000 for efficiency
-    chunk_size = 2000
-    for i in range(0, len(records_to_create), chunk_size):
-        db.bulk_save_objects(records_to_create[i : i + chunk_size])
-        db.commit()
-    return len(records_to_create)
-@classmethod
-def load_sample_dataset_into_db(cls, db: Session) -> Dict[str, Any]:
-    """Loads or generates the 6-month synthetic dataset into database."""
-    base_dir = Path(__file__).resolve().parent.parent.parent
-    csv_path = base_dir / "datasets" / "sample_energy_data.csv"
+        chunk_size = 2000
+        for i in range(0, len(records_to_create), chunk_size):
+            db.bulk_save_objects(records_to_create[i : i + chunk_size])
+            db.commit()
 
-    if not csv_path.exists():
-        from ..utils.seed_data import generate_synthetic_dataset
-        df = generate_synthetic_dataset(output_path=str(csv_path), days=180)
-    else:
-        df = pd.read_csv(str(csv_path))
+        return len(records_to_create)
 
-    df, quality_report = cls.validate_and_profile_data(df)
-    records_count = cls.ingest_dataframe_to_db(df, db, replace_existing=True)
+    @classmethod
+    def load_sample_dataset_into_db(cls, db: Session) -> Dict[str, Any]:
+        """Loads or generates the 6-month synthetic dataset into database."""
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        csv_path = base_dir / "datasets" / "sample_energy_data.csv"
 
-    return {
-        "records_count": records_count,
-        "quality_report": quality_report,
-        "message": f"Successfully loaded 6-month demonstration dataset with {records_count:,} records.",
+        if not csv_path.exists():
+            from ..utils.seed_data import generate_synthetic_dataset
+            df = generate_synthetic_dataset(output_path=str(csv_path), days=180)
+        else:
+            df = pd.read_csv(str(csv_path))
+
+        df, quality_report = cls.validate_and_profile_data(df)
+        records_count = cls.ingest_dataframe_to_db(df, db, replace_existing=True)
+
+        return {
+            "records_count": records_count,
+            "quality_report": quality_report,
+            "message": f"Successfully loaded 6-month demonstration dataset with {records_count:,} records.",
         }
