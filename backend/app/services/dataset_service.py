@@ -215,16 +215,16 @@ for _, row in df.iterrows():
     elif hasattr(ts, "to_pydatetime"):
         ts = ts.to_pydatetime()
 
-            records_to_create.append(
-                EnergyRecord(
-                    timestamp=ts,
-                    building=str(row["building"]),
-                    department=str(row["department"]),
-                    appliance=str(row["appliance"]),
-                    energy_consumption_kwh=float(row["energy_consumption_kwh"]),
-                    temperature=float(row["temperature"]),
-                    occupancy=int(occupancy_value),
-                    electricity_rate=float(row["electricity_rate"]),
+    records_to_create.append(
+        EnergyRecord(
+            timestamp=ts,
+            building=str(row["building"]),
+            department=str(row["department"]),
+            appliance=str(row["appliance"]),
+            energy_consumption_kwh=float(row["energy_consumption_kwh"]),
+            temperature=float(row["temperature"]),
+            occupancy=int(occupancy_value),
+            electricity_rate=float(row["electricity_rate"]),
                 )
             )
 
