@@ -200,19 +200,20 @@ class DatasetService:
 
         # Batch insert energy records
         records_to_create = []
-        for _, row in df.iterrows():
-            occupancy_value = row["occupancy"]
+for _, row in df.iterrows():
+    occupancy_value = row["occupancy"]
 
-        if isinstance(occupancy_value, pd.Series):
-            occupancy_value = occupancy_value.iloc[0]
+    if isinstance(occupancy_value, pd.Series):
+        occupancy_value = occupancy_value.iloc[0]
 
-        occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
-        occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
-        ts = row["timestamp"]
-        if isinstance(ts, str):
-            ts = datetime.fromisoformat(ts)
-        elif hasattr(ts, "to_pydatetime"):
-            ts = ts.to_pydatetime()
+    occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
+    occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
+
+    ts = row["timestamp"]
+    if isinstance(ts, str):
+        ts = datetime.fromisoformat(ts)
+    elif hasattr(ts, "to_pydatetime"):
+        ts = ts.to_pydatetime()
 
             records_to_create.append(
                 EnergyRecord(
