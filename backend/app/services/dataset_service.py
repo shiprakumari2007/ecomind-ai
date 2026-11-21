@@ -107,7 +107,7 @@ def validate_and_profile_data(cls, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict
         duplicates_count = int(df.duplicated(subset=["timestamp", "building", "department", "appliance"]).sum())
 
         # Clean timestamp
-         try:
+        try:
             df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
         except Exception:
             pass
