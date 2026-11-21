@@ -209,10 +209,10 @@ class DatasetService:
         occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
         occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
         ts = row["timestamp"]
-            if isinstance(ts, str):
-                ts = datetime.fromisoformat(ts)
-            elif hasattr(ts, "to_pydatetime"):
-                ts = ts.to_pydatetime()
+        if isinstance(ts, str):
+            ts = datetime.fromisoformat(ts)
+        elif hasattr(ts, "to_pydatetime"):
+            ts = ts.to_pydatetime()
 
             records_to_create.append(
                 EnergyRecord(
