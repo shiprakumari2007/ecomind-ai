@@ -229,12 +229,12 @@ for _, row in df.iterrows():
             )
 
         # Insert in chunks of 2,000 for efficiency
-        chunk_size = 2000
-        for i in range(0, len(records_to_create), chunk_size):
-            db.bulk_save_objects(records_to_create[i : i + chunk_size])
-            db.commit()
+    chunk_size = 2000
+    for i in range(0, len(records_to_create), chunk_size):
+        db.bulk_save_objects(records_to_create[i : i + chunk_size])
+        db.commit()
 
-        return len(records_to_create)
+    return len(records_to_create)
 
     @classmethod
     def load_sample_dataset_into_db(cls, db: Session) -> Dict[str, Any]:
