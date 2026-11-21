@@ -212,6 +212,7 @@ def validate_and_profile_data(cls, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict
             occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
 
             ts = row["timestamp"]
+
             if isinstance(ts, str):
                 ts = datetime.fromisoformat(ts)
             elif hasattr(ts, "to_pydatetime"):
@@ -230,11 +231,12 @@ def validate_and_profile_data(cls, df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict
                 )
             )
 
-        # Insert in chunks of 2,000 for efficiency
         chunk_size = 2000
+
         for i in range(0, len(records_to_create), chunk_size):
-            db.bulk_save_objects(records_to_create[i : i + chunk_size])
-            db.commit()
+            db.bulk_save_objects(records_to_create[i:i + chunk_size])
+
+        db.commit()
 
         return len(records_to_create)
 
