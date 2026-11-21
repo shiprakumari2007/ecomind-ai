@@ -200,31 +200,31 @@ class DatasetService:
 
         # Batch insert energy records
         records_to_create = []
-for _, row in df.iterrows():
-    occupancy_value = row["occupancy"]
+       for _, row in df.iterrows():
+           occupancy_value = row["occupancy"]
 
-    if isinstance(occupancy_value, pd.Series):
-        occupancy_value = occupancy_value.iloc[0]
+           if isinstance(occupancy_value, pd.Series):
+               occupancy_value = occupancy_value.iloc[0]
 
-    occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
-    occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
+          occupancy_value = pd.to_numeric(occupancy_value, errors="coerce")
+          occupancy_value = 0 if pd.isna(occupancy_value) else occupancy_value
 
-    ts = row["timestamp"]
-    if isinstance(ts, str):
-        ts = datetime.fromisoformat(ts)
-    elif hasattr(ts, "to_pydatetime"):
-        ts = ts.to_pydatetime()
+          ts = row["timestamp"]
+          if isinstance(ts, str):
+              ts = datetime.fromisoformat(ts)
+          elif hasattr(ts, "to_pydatetime"):
+              ts = ts.to_pydatetime()
 
-    records_to_create.append(
-        EnergyRecord(
-            timestamp=ts,
-            building=str(row["building"]),
-            department=str(row["department"]),
-            appliance=str(row["appliance"]),
-            energy_consumption_kwh=float(row["energy_consumption_kwh"]),
-            temperature=float(row["temperature"]), 
-            occupancy=int(occupancy_value),
-            electricity_rate=float(row["electricity_rate"]),
+         records_to_create.append(
+             EnergyRecord(
+                 timestamp=ts,
+                 building=str(row["building"]),
+                 department=str(row["department"]),
+                 appliance=str(row["appliance"]),
+                 energy_consumption_kwh=float(row["energy_consumption_kwh"]),
+                 temperature=float(row["temperature"]), 
+                 occupancy=int(occupancy_value),
+                 electricity_rate=float(row["electricity_rate"]),
                 )
             )
 
