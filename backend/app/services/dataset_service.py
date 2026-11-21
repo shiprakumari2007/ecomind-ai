@@ -234,24 +234,23 @@ for _, row in df.iterrows():
         db.bulk_save_objects(records_to_create[i : i + chunk_size])
         db.commit()
 return len(records_to_create)
+@classmethod
+def load_sample_dataset_into_db(cls, db: Session) -> Dict[str, Any]:
+    """Loads or generates the 6-month synthetic dataset into database."""
+    base_dir = Path(__file__).resolve().parent.parent.parent
+    csv_path = base_dir / "datasets" / "sample_energy_data.csv"
 
-    @classmethod
-    def load_sample_dataset_into_db(cls, db: Session) -> Dict[str, Any]:
-        """Loads or generates the 6-month synthetic dataset into database."""
-        base_dir = Path(__file__).resolve().parent.parent.parent
-        csv_path = base_dir / "datasets" / "sample_energy_data.csv"
+    if not csv_path.exists():
+        from ..utils.seed_data import generate_synthetic_dataset
+        df = generate_synthetic_dataset(output_path=str(csv_path), days=180)
+    else:
+        df = pd.read_csv(str(csv_path))
 
-        if not csv_path.exists():
-            from ..utils.seed_data import generate_synthetic_dataset
-            df = generate_synthetic_dataset(output_path=str(csv_path), days=180)
-        else:
-            df = pd.read_csv(str(csv_path))
+    df, quality_report = cls.validate_and_profile_data(df)
+    records_count = cls.ingest_dataframe_to_db(df, db, replace_existing=True)
 
-        df, quality_report = cls.validate_and_profile_data(df)
-        records_count = cls.ingest_dataframe_to_db(df, db, replace_existing=True)
-
-        return {
-            "records_count": records_count,
-            "quality_report": quality_report,
-            "message": f"Successfully loaded 6-month demonstration dataset with {records_count:,} records.",
+    return {
+        "records_count": records_count,
+        "quality_report": quality_report,
+        "message": f"Successfully loaded 6-month demonstration dataset with {records_count:,} records.",
         }
